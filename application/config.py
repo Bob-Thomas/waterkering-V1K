@@ -1,0 +1,1 @@
+SECRET_KEY = "oh so secret"
