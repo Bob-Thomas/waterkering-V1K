@@ -1,16 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class="dashboard">
-    {% for keys in data %}
-        {% if keys in "sensors" %}
-            {% for item in data[keys] %}
-                {% for arrayKey in item %}
-                    <h1> {{arrayKey}}: {{item[arrayKey]}} </h1>
-                {% endfor %}
-            {% endfor %}
-        {% else %}
-            <h1> {{keys}}: {{ data[keys] }} </h1>
-        {% endif %}
-    {% endfor %}
+    <h1> LOCAL IP: {{data.local_ip}} </h1>
+    <h1> WARNING: {{data.warning_level}} </h1>
+    <h1> SENSOR NAME: {{data.sensors[0].name}}</h1>
+    <h1> SENSOR VALUE: {{data.sensors[0].value}}</h1>
 </div>
 {% endblock %}
