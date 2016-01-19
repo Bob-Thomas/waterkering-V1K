@@ -1,9 +1,20 @@
 {% extends "layout.html" %}
 {% block body %}
-<div class="dashboard">
-    <h1> LOCAL IP: {{data.local_ip}} </h1>
-    <h1> WARNING: {{data.warning_level}} </h1>
-    <h1> SENSOR NAME: {{data.sensors[0].name}}</h1>
-    <h1> SENSOR VALUE: {{data.sensors[0].value}}</h1>
+<div class="container">
+    <div class="kolom">
+        <h1 id="sensor_value"> SENSOR VALUE: {{data.sensors[0].value}}</h1>
+    </div>
+    <div class="kolom">
+        <h1 id="local_IP"> LOCAL IP: {{data.local_ip}} </h1>
+    </div>
+    <div class="kolom">
+        <h1 id="warning"> WARNING: {{data.warning_level}} </h1>
+        <h1 id="sensor_name"> SENSOR NAME: {{data.sensors[0].name}}</h1>
+    </div>
 </div>
+
+
+
+
+
 {% endblock %}
