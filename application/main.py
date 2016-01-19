@@ -31,7 +31,6 @@ elif async_mode == 'gevent':
     monkey.patch_all()
 
 
-import fcntl
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 import config
@@ -43,16 +42,11 @@ app.config.from_object(config)
 socketio = SocketIO(app, async_mode=async_mode)
 
 
-def get_ip_address(ifname):
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    return socket.inet_ntoa(fcntl.ioctl(
-        s.fileno(),
-        0x8915,  # SIOCGIFADDR
-        struct.pack('256s', ifname[:15])
-    )[20:24])
+def get_ip_address():
+    return [ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if not ip.startswith("127.")][:1][0]
 
 data = {
-  "local_ip": get_ip_address('eth0'),
+  "local_ip": get_ip_address(),
   "timestamp": 234189073,
   "station": 0,
   "sensors": [
