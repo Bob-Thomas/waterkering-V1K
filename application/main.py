@@ -1,6 +1,15 @@
 # Set this variable to "threading", "eventlet" or "gevent" to test the
 # different async modes, or leave it set to None for the application to choose
 # the best option based on available packages.
+import socket
+import struct
+import time
+import threading
+import config
+
+import pyqrcode
+from flask import Flask, render_template
+from flask_socketio import SocketIO, emit
 async_mode = None
 if async_mode is None:
     try:
@@ -30,14 +39,6 @@ elif async_mode == 'gevent':
     from gevent import monkey
     monkey.patch_all()
 
-
-from flask import Flask, render_template
-from flask_socketio import SocketIO, emit
-import config
-import socket
-import struct
-import time
-import threading
 app = Flask(__name__)
 app.config.from_object(config)
 socketio = SocketIO(app, async_mode=async_mode)
@@ -101,4 +102,8 @@ test()
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
+    port = 5000
+    debug = True
+    url = pyqrcode.create('http:/'+get_ip_address())
+    url.svg('static/images/qr.svg', scale=8)
+    socketio.run(app, debug=debug, host='0.0.0.0', port=port)

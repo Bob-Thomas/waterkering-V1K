@@ -1,24 +1,13 @@
 h1 {
     font-style: normal;
     font-family: "arial";
-}
-
-#sensor_value {
-    text-align: left;
-}
-
-#local_IP {
     text-align: center;
 }
 
-#warning {
-    text-align: center;
+.qr-image {
+  margin-left: 25%;
 }
 
-#sensor_name {
-    text-align: center;
-
-}
 
 .kolom {
     float: left;
