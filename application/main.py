@@ -39,6 +39,7 @@ elif async_mode == 'gevent':
 app = Flask(__name__)
 app.config.from_object(config)
 socketio = SocketIO(app, async_mode=async_mode)
+amount_users = 0
 
 
 def get_ip_address():
@@ -48,6 +49,7 @@ data = {
   "local_ip": get_ip_address(),
   "timestamp": 234189073,
   "station": 0,
+  "users": amount_users,
   "sensors": [
     {
       "name": "water_pressure",
@@ -92,6 +94,21 @@ def sensor_update():
     else:
         return 'ok'
 
+
+@socketio.on('connect', namespace='/')
+def test_connect():
+    global amount_users, data
+    amount_users += 1
+    data['users'] = amount_users
+    socketio.emit('update', {'data': data})
+
+
+@socketio.on('disconnect', namespace='/')
+def test_disconnect():
+    global amount_users, data
+    amount_users -= 1
+    data['users'] = amount_users
+    socketio.emit('update', {'data': data})
 # direction = 0
 # def test():
 #     global direction
