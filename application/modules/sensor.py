@@ -1,5 +1,7 @@
 import RPi.GPIO as GPIO
 import time
+import requests
+
 GPIO.setmode(GPIO.BCM)
 
 
@@ -43,7 +45,7 @@ class GPIOHelper:
         GPIO.setup(self.pin, GPIO.IN)
         # This takes about 1 millisecond per loop cycle
         while GPIO.input(self.pin) == GPIO.LOW:
-                reading += 1
+            reading += 1
         print reading
 
     def create_listener(self, event, callback):
@@ -60,11 +62,26 @@ class GPIOHelper:
     def turn_servo(self, rotation):
         if "SERVO" not in self.mode:
             raise NameError("Mode is not SERVO0")
-        self.pwm.ChangeDutyCycle(float(rotation)/10.0 + 2.5)
+        self.pwm.ChangeDutyCycle(float(rotation) / 10.0 + 2.5)
 
     def __del__(self):
         GPIO.cleanup()
 
+
+value = 0
+
+
+def update_sensor(channel, button):
+    global value
+    value += 10
+    requests.post('http://128.199.35.118//sensor/update', data={'value': value})
+
+
+button = GPIOHelper('button', 21, 'IN')
+button.create_listener(GPIO.RISING, lambda event: update_sensor(event, button))
+
+while True:
+    pass
 
 """ EXAMPLE USAGE
 

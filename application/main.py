@@ -2,13 +2,10 @@
 # different async modes, or leave it set to None for the application to choose
 # the best option based on available packages.
 import socket
-import struct
-import time
-import threading
 import config
 
 import pyqrcode
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
 async_mode = None
 if async_mode is None:
@@ -71,39 +68,63 @@ data = {
 def home():
     return render_template('home.html', data=data)
 
-direction = 0
-def test():
-    global direction
-    threading.Timer(0.10, test).start()
-    value = data['sensors'][0]['value']
-    if value >= 100:
-        direction = 1
-    elif value <= 0:
-        direction = 0
-    if direction == 0 :
-        value = value+1
-    elif direction == 1:
-        value = value-1
 
-    data['sensors'][0]['value'] = value
-    if value >= 100:
-        data['warning_level'] = 'blue'
-    elif value < 50:
-        data['warning_level'] = 'lightGreen'
-    elif value > 50 and value < 75:
-        data['warning_level'] = 'orange'
-    elif value >= 75:
-        data['warning_level'] = 'red'
+@app.route('/sensor/update', methods=['POST', 'GET'])
+def sensor_update():
+    global data
+    if request.method == 'POST':
+        # print request.form.to_dict()['value']
+        json_data = request.form.to_dict()
+        value = int(json_data['value'])
+        data['sensors'][0]['value'] = value
+        print value >= 100
+        if value >= 100:
+            data['warning_level'] = 'blue'
+        elif value < 50:
+            data['warning_level'] = 'lightGreen'
+        elif 50 < value < 75:
+            data['warning_level'] = 'orange'
+        elif value >= 75:
+            data['warning_level'] = 'red'
 
-    socketio.emit('update', {'data':data})
+        socketio.emit('update', {'data': data})
+        return jsonify(json_data)
+    else:
+        return 'ok'
 
-
-test()
-
+# direction = 0
+# def test():
+#     global direction
+#     threading.Timer(0.10, test).start()
+#     value = data['sensors'][0]['value']
+#     if value >= 100:
+#         direction = 1
+#     elif value <= 0:
+#         direction = 0
+#     if direction == 0 :
+#         value = value+1
+#     elif direction == 1:
+#         value = value-1
+#
+#     data['sensors'][0]['value'] = value
+#     if value >= 100:
+#         data['warning_level'] = 'blue'
+#     elif value < 50:
+#         data['warning_level'] = 'lightGreen'
+#     elif value > 50 and value < 75:
+#         data['warning_level'] = 'orange'
+#     elif value >= 75:
+#         data['warning_level'] = 'red'
+#
+#     socketio.emit('update', {'data':data})
+#
+#
+# test()
+#
 
 if __name__ == '__main__':
     port = 5000
     debug = True
-    url = pyqrcode.create('http:/'+get_ip_address())
+    url = pyqrcode.create('http:/'+str(get_ip_address()))
     url.svg('static/images/qr.svg', scale=8)
     socketio.run(app, debug=debug, host='0.0.0.0', port=port)
