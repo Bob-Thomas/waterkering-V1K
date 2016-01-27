@@ -106,9 +106,10 @@ def test_connect():
 @socketio.on('disconnect', namespace='/')
 def test_disconnect():
     global amount_users, data
-    amount_users -= 1
-    data['users'] = amount_users
-    socketio.emit('update', {'data': data})
+    if amount_users > 0:
+        amount_users -= 1
+        data['users'] = amount_users
+        socketio.emit('update', {'data': data})
 # direction = 0
 # def test():
 #     global direction
