@@ -21,14 +21,18 @@ class GPIOHelper:
             get_input       Return the input on the pin = 1, 0
             turn_servo      Send a pwm signal to the pin with rotational information
     """
+
     def __init__(self, name, pin, mode='OUT'):
+        self.name = ""
         self.name = name
         self.pin = pin
         self.mode = mode
+        self.servo_pos = 0
         if mode is 'OUT':
             GPIO.setup(self.pin, GPIO.OUT)
         elif mode is 'IN':
-            GPIO.setup(self.pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+            print self.pin
+            GPIO.setup(self.pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         elif mode is "IN-RCT":
             GPIO.setup(self.pin, GPIO.OUT)
 
@@ -62,28 +66,57 @@ class GPIOHelper:
     def turn_servo(self, rotation):
         if "SERVO" not in self.mode:
             raise NameError("Mode is not SERVO0")
-        self.pwm.ChangeDutyCycle(float(rotation) / 10.0 + 2.5)
+        self.pwm.ChangeDutyCycle(float(self.servo_pos) / 10.0 + 2.5)
+        self.servo_pos = rotation
 
     def __del__(self):
         GPIO.cleanup()
 
 
-value = 0
+sensor_pins = [4, 17, 27, 22, 10, 9, 11, 5, 6, 13]
+water_sensors = []
+counter = 0
+door_one = GPIOHelper('servo 1', 21, 'SERVO')
 
 
-def update_sensor(channel, button):
-    global value
-    value += 10
-    requests.post('http://128.199.35.118//sensor/update', data={'value': value})
+door_two = GPIOHelper('servo 2', 12, 'SERVO')
 
 
-button = GPIOHelper('button', 21, 'IN')
-button.create_listener(GPIO.RISING, lambda event: update_sensor(event, button))
+def update_water(channel):
+    global water_sensors
+    for pin in water_sensors:
+        if pin.pin == channel:
+            value = int(pin.name)
+            if value >= 80 and door_one.servo_pos == 360:
+                door_one.turn_servo(0)
+                door_two.turn_servo(0)
+            elif value < 80 and door_one.servo_pos == 0:
+                door_one.turn_servo(360)
+                door_two.turn_servo(360)
+            print "updating with value {}".format(value)
+            requests.post('http://10.0.0.22:5000/sensor/update', data={'value': value})
+
+for pin in sensor_pins:
+    counter += 10
+    water_sensors.append(GPIOHelper('{}'.format(counter), pin, 'IN'))
+for pin in water_sensors:
+    pin.create_listener(GPIO.RISING, update_water)
 
 while True:
     pass
 
-""" EXAMPLE USAGE
+"""direction = 0
+while True:
+    if value >= 100:
+        direction = 1
+    elif value <= 0:
+        direction = 0
+    if direction == 1:
+        update_sensor('')
+    elif direction == 0:
+        update_sensor('rise')
+    time.sleep(1)
+EXAMPLE USAGE
 
 def open_door_and_light_led(channel, led):
     if led.get_input():
