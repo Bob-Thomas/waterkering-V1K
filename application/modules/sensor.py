@@ -29,7 +29,7 @@ class GPIOHelper:
         self.mode = mode
         self.servo_pos = 0
         if mode is 'OUT':
-            GPIO.setup(self.pin, GPIO.OUT)
+            GPIO.setup(self.pin, GPIO.OUT, initial=0)
         elif mode is 'IN':
             print self.pin
             GPIO.setup(self.pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
@@ -74,12 +74,15 @@ class GPIOHelper:
 
 
 sensor_pins = [4, 17, 27, 22, 10, 9, 11, 5, 6, 13]
+led_pins = [16, 25, 23]
 water_sensors = []
 counter = 0
 door_one = GPIOHelper('servo 1', 21, 'SERVO')
+door_one.turn_servo(0)
 
-
-door_two = GPIOHelper('servo 2', 12, 'SERVO')
+green_led = GPIOHelper('green led', 16, 'OUT')
+orange_led = GPIOHelper('orange led', 23, 'OUT')
+red_led = GPIOHelper('red led', 25, 'OUT')
 
 
 def update_water(channel):
@@ -87,14 +90,23 @@ def update_water(channel):
     for pin in water_sensors:
         if pin.pin == channel:
             value = int(pin.name)
-            if value >= 80 and door_one.servo_pos == 360:
+            if value < 50:
+                green_led.send_signal(GPIO.HIGH)
+                orange_led.send_signal(GPIO.LOW)
+                red_led.send_signal(GPIO.LOW)
                 door_one.turn_servo(0)
-                door_two.turn_servo(0)
-            elif value < 80 and door_one.servo_pos == 0:
-                door_one.turn_servo(360)
-                door_two.turn_servo(360)
+            elif 50 < value < 75:
+                door_one.turn_servo(0)
+                orange_led.send_signal(GPIO.HIGH)
+                red_led.send_signal(GPIO.LOW)
+            elif value >= 75:
+                door_one.turn_servo(90)
+                red_led.send_signal(GPIO.HIGH)
+                orange_led.send_signal(GPIO.HIGH)
+                green_led.send_signal(GPIO.HIGH)
             print "updating with value {}".format(value)
-            requests.post('http://10.0.0.22:5000/sensor/update', data={'value': value})
+            requests.post('http://128.199.35.118/sensor/update', data={'value': value})
+
 
 for pin in sensor_pins:
     counter += 10
@@ -104,6 +116,7 @@ for pin in water_sensors:
 
 while True:
     pass
+GPIO.cleanup()
 
 """direction = 0
 while True:
