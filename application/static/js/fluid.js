@@ -15,7 +15,7 @@ function Wave() {
     var DETAIL = Math.round(WIDTH / 60); // The number of particles used to build up the wave
     var WATER_DENSITY = 1.07;
     var AIR_DENSITY = 1.02;
-    var TWITCH_INTERVAL = 2000; // The interval between random impulses being inserted into the wave to keep it moving
+    var TWITCH_INTERVAL = 500; // The interval between random impulses being inserted into the wave to keep it moving
 
     /** Twitter interaction settings */
     var TWITTER_QUERY = 'water'; // The search term for tweets
