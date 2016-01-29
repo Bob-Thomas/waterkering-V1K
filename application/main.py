@@ -52,17 +52,12 @@ data = {
   "users": amount_users,
   "sensors": [
     {
-      "name": "water_pressure",
-      "value": 0.0
-    },
-    {
-      "name": "whateversenseor",
+      "name": "Water Level",
       "value": 0.0
     }
   ],
-  "warning_level": "orange",
-  "doors_open": False,
-  "doors_opening": False
+  "warning_level": "lightGreen",
+  "door_status": 'open',
 }
 
 
@@ -78,17 +73,16 @@ def sensor_update():
         # print request.form.to_dict()['value']
         json_data = request.form.to_dict()
         value = int(json_data['value'])
+        door_status = json_data['door_status']
         data['sensors'][0]['value'] = value
-        print value >= 100
-        if value >= 100:
-            data['warning_level'] = 'blue'
-        elif value < 50:
+        if value < 50:
             data['warning_level'] = 'lightGreen'
         elif 50 < value < 75:
             data['warning_level'] = 'orange'
         elif value >= 75:
             data['warning_level'] = 'red'
 
+        data['door_status'] = door_status
         socketio.emit('update', {'data': data})
         return jsonify(json_data)
     else:
@@ -110,35 +104,6 @@ def test_disconnect():
         amount_users -= 1
         data['users'] = amount_users
         socketio.emit('update', {'data': data})
-# direction = 0
-# def test():
-#     global direction
-#     threading.Timer(0.10, test).start()
-#     value = data['sensors'][0]['value']
-#     if value >= 100:
-#         direction = 1
-#     elif value <= 0:
-#         direction = 0
-#     if direction == 0 :
-#         value = value+1
-#     elif direction == 1:
-#         value = value-1
-#
-#     data['sensors'][0]['value'] = value
-#     if value >= 100:
-#         data['warning_level'] = 'blue'
-#     elif value < 50:
-#         data['warning_level'] = 'lightGreen'
-#     elif value > 50 and value < 75:
-#         data['warning_level'] = 'orange'
-#     elif value >= 75:
-#         data['warning_level'] = 'red'
-#
-#     socketio.emit('update', {'data':data})
-#
-#
-# test()
-#
 
 if __name__ == '__main__':
     port = 5000

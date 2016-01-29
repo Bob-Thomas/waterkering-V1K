@@ -87,25 +87,33 @@ red_led = GPIOHelper('red led', 25, 'OUT')
 
 def update_water(channel):
     global water_sensors
+    data = {
+        'value': 0,
+        'door_status': 'open'
+    }
     for pin in water_sensors:
         if pin.pin == channel:
             value = int(pin.name)
             if value < 50:
+                data['door_status'] = 'open'
                 green_led.send_signal(GPIO.HIGH)
                 orange_led.send_signal(GPIO.LOW)
                 red_led.send_signal(GPIO.LOW)
                 door_one.turn_servo(0)
             elif 50 < value < 75:
+                data['door_status'] = 'open'
                 door_one.turn_servo(0)
                 orange_led.send_signal(GPIO.HIGH)
                 red_led.send_signal(GPIO.LOW)
             elif value >= 75:
+                data['door_status'] = 'closed'
                 door_one.turn_servo(90)
                 red_led.send_signal(GPIO.HIGH)
                 orange_led.send_signal(GPIO.HIGH)
                 green_led.send_signal(GPIO.HIGH)
             print "updating with value {}".format(value)
-            requests.post('http://128.199.35.118/sensor/update', data={'value': value})
+            data['value'] = value
+            requests.post('http://128.199.35.118/sensor/update', data=data)
 
 
 for pin in sensor_pins:

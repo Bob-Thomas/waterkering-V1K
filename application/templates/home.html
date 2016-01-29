@@ -2,24 +2,27 @@
 {% block body %}
 <div class="container">
     <div class="kolom">
-        <h1 id="sensor_value"> SENSOR VALUE: {{data.sensors[0].value}}</h1>
+        <h1 id="sensor_value"> Water level: {{data.sensors[0].value}}</h1>
     </div>
     <div class="kolom">
-      <h1 class='qr-text'>Check it out for yourself <br>
-          current user count : <span class="user-amount">{{data.users}}</span>
-      </h1>
-      <h1>{{data.local_ip}}</h1>
-      <img class='qr-image' src="{{url_for('static', filename='images/qr.svg')}}" alt="" />
+        <h1 id="door_status"> Door Status: {{data.door_status}} </h1>
+        <img id="door_image" src="{{url_for('static', filename='images/'+data.door_status+'.png')}}" width="600"
+             height="400" alt="">
     </div>
     <div class="kolom">
         <h1 id="warning"> WARNING: {{data.warning_level}} </h1>
         <h1 id="sensor_name"> SENSOR NAME: {{data.sensors[0].name}}</h1>
     </div>
+    <div class="kolom">
+        <h1 class='qr-text'>Check it out for yourself <br>
+            current user count : <span class="user-amount">{{data.users}}</span>
+        </h1>
+        <h1>{{data.local_ip}}</h1>
+        <img class='qr-image' src="{{url_for('static', filename='images/qr.svg')}}" alt=""/>
+    </div>
+
 
 </div>
-
-
-
 
 
 {% endblock %}

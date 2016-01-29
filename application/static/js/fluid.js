@@ -1,5 +1,6 @@
 /**
- *
+ * Made by the amazing - Hakim El Hattab : http://hakim.se/experiments/html5/wave/03/
+ * Altered for use for stupid school project OwO
  */
 function Wave() {
 
